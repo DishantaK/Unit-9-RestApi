@@ -6,7 +6,7 @@ const { authenticateUser } = require('../auth');
 
 //  return all properties and values for the currently authenticated User along with a 200 HTTP status code.
 router.get('/', authenticateUser, async function(req, res) {
-    
+
     const user = req.currentUser;
     if(user){
     res.status(200).json({
@@ -37,8 +37,8 @@ router.post('/', async function(req, res) {
             req.body.password =  bcrypt.hashSync(req.body.password, 10);
         }
      
-        await User.create(user);
-        res.status(201).location("/");
+        let response = await User.create(user);
+        res.status(201).send(response).location("/");
         } catch (error) {
             if(error.name === "SequelizeValidationError") { 
                 res.status(400).json(error.errors)

@@ -33,7 +33,7 @@ const courseRouter = require('./routes/course');
 
 // create the Express app
 const app = express();
-
+app.use(express.json());
 // Root routes
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
