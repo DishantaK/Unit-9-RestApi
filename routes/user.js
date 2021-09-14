@@ -28,7 +28,7 @@ router.post('/', async function(req, res) {
 
       // if any is field null, then reject
       // hash password req.body.password 
-
+      // Also noting this works when creating a brand new user. Validation errors occur for creating an existing user ex. "john"
     try {
         const user = req.body;
         const password = req.body.password;
@@ -37,11 +37,12 @@ router.post('/', async function(req, res) {
             req.body.password =  bcrypt.hashSync(req.body.password, 10);
         }
      
-        let response = await User.create(user);
-        res.status(201).send(response).location("/");
+        await User.create(user)
+        res.status(201).location('/').end()
         } catch (error) {
             if(error.name === "SequelizeValidationError") { 
-                res.status(400).json(error.errors)
+                const errors = error.errors.map(error => error.message);
+                res.status(400).json({ errors })
               } else {
                 throw error; 
               }  

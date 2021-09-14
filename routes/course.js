@@ -12,7 +12,13 @@ router.get('/', async function(req, res) {
 
 // return the corresponding course including the User associated with that course and a 200 HTTP status code.
 router.get('/:id', async function(req, res) {
-    const course = await Course.findByPk(req.params.id);
+    const course = await Course.findByPk(req.params.id,
+      {
+        include: [
+          {
+              model: User,
+          }]
+      });
     if(course === null) {
         res.status(404);
       } else {
@@ -31,8 +37,9 @@ router.post('/', authenticateUser, async function(req, res) {
         res.status(201).location(`/${newCourse.id}`)
     } catch (error) {
         if(error.name === "SequelizeValidationError") { 
-            let newCourse = await Course.create(req.body);
-            res.status(400).json(error.errors)
+          const errors = error.errors.map(error => error.message);
+            // let newCourse = await Course.create(req.body);
+            res.status(400).json({ errors })
           } else {
             throw error; 
           }  
@@ -44,14 +51,25 @@ router.put('/:id', authenticateUser, async function(req, res) {
     const course = await Course.findByPk(req.params.id);
    // if title and description null, reject
     if(course === null) {
-        res.status(404).redirect('/');
+        res.status(404).location('/').end();
       } else {
         try{
-        await course.update(req.body);
-        res.status(204).json(course); 
+          if( req.currentUser.id === course.userId ){
+              if(course){
+                  console.log('Updating...')
+                  await course.update(req.body)
+                  res.status(204).end()
+              }else{
+                  res.status(404).end()
+              }
+          }else{
+              res.status(403)
+              .json({message: "Update Failed. No permissions."})
+          }
         } catch(error) {
             if(error.name === "SequelizeValidationError") { 
-                await course.update(req.body);
+              const errors = error.errors.map(error => error.message);
+                // await course.update(req.body);
                 res.status(400).json(error.errors)
               } else {
                 throw error; 
@@ -68,7 +86,7 @@ router.delete('/:id',  authenticateUser, async function(req, res) {
         res.status(404);
       } else {
         await course.destroy();
-        res.status(204).redirect('/'); 
+        res.status(204); 
       }
 });
 
