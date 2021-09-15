@@ -6,7 +6,12 @@ const { authenticateUser } = require('../auth');
 // return all courses including the User associated with each course and a 200 HTTP status code.
 
 router.get('/', async function(req, res) {
-    const courses =  await Course.findAll();
+    const courses =  await Course.findAll({
+      include: [
+        {
+            model: User,
+        }]
+    });
     res.status(200).json(courses);
 });
 
@@ -34,7 +39,7 @@ router.post('/', authenticateUser, async function(req, res) {
     try{
         let newCourse = await Course.create(req.body);
         console.log(newCourse)
-        res.status(201).location(`/${newCourse.id}`)
+        res.status(201).location(`/${newCourse.id}`).end()
     } catch (error) {
         if(error.name === "SequelizeValidationError") { 
           const errors = error.errors.map(error => error.message);
@@ -70,7 +75,7 @@ router.put('/:id', authenticateUser, async function(req, res) {
             if(error.name === "SequelizeValidationError") { 
               const errors = error.errors.map(error => error.message);
                 // await course.update(req.body);
-                res.status(400).json(error.errors)
+                res.status(400).json(error.errors).end()
               } else {
                 throw error; 
               }  
@@ -86,7 +91,7 @@ router.delete('/:id',  authenticateUser, async function(req, res) {
         res.status(404);
       } else {
         await course.destroy();
-        res.status(204); 
+        res.status(204).end(); 
       }
 });
 

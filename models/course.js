@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
      Course.belongsTo(models.User
       , {foreignKey: {
         fieldName: 'userId',
-        allowNull: false,
+       
       },
     }
     );
@@ -26,18 +26,26 @@ module.exports = (sequelize, DataTypes) => {
     title: {
       type: DataTypes.STRING,
       allowNull: false,
+      notEmpty: true,  
       validate: {
       notNull: {
         msg: 'Please enter a course title'
+      },
+      notEmpty: {
+        msg: "Please enter a value for the course title",
       }
     }
     },
     description:{
       type: DataTypes.TEXT,
       allowNull: false,
+      notEmpty: true,  
       validate: {
       notNull: {
         msg: 'Please enter a description'
+      },
+      notEmpty: {
+        msg: "Please enter a value for the course description",
       }
     }
     },
